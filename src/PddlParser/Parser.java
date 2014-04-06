@@ -23,16 +23,18 @@ public class Parser {
     private ArrayList<String> goals;
     private ArrayList<String> env;
     
-    public Parser(){                   
+    public Parser(String domain, String task) throws IOException{                   
             preds = new ArrayList();
             goals = new ArrayList();
             env = new ArrayList();
             preCond = new HashMap();
             effects = new HashMap();
+            parseDomain(domain);
+            parseTask(task);
         }
-    public void parseDomain() throws IOException
+    private void parseDomain(String domain) throws IOException
     {
-        BufferedReader reader = new BufferedReader(new FileReader("src/Planning/domain06.pddl"));
+        BufferedReader reader = new BufferedReader(new FileReader(domain));
         String line;
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(" ");
@@ -46,9 +48,9 @@ public class Parser {
             }                    
         }        
     }
-    public void parseTask() throws FileNotFoundException, IOException
+    private void parseTask(String task) throws FileNotFoundException, IOException
     {
-        BufferedReader reader = new BufferedReader(new FileReader("src/Planning/task07.pddl"));
+        BufferedReader reader = new BufferedReader(new FileReader(task));
         String line;
         while ((line = reader.readLine()) != null) {
             String[] parts = line.split(" ");
@@ -60,8 +62,7 @@ public class Parser {
                     goals = readIn(reader);
                     break;
             }                    
-        }
-        int i = 0;
+        }       
     }
     private void readAction(BufferedReader reader, String action) throws IOException
     { 
@@ -103,6 +104,10 @@ public class Parser {
             }
         }
         return temp;
+    }
+    public ArrayList<String> getInit()
+    {
+        return env;
     }
 }
         

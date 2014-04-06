@@ -5,6 +5,8 @@
 package agents;
 
 import PddlParser.Parser;
+import PddlParser.TaskWriter;
+import environment.StateHandler;
 import jade.core.Agent;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
@@ -27,14 +29,14 @@ import java.util.logging.Logger;
  * @author Plumbly
  */
 public class Initialize extends Agent{
-    String task1 = "src/Planning/task06.pddl";
-    String task2 = "src/Planning/task07.pddl";
     public void setup(){ 
-        Parser p = new Parser();
+        
         try {
-            p.parseDomain();
-            p.parseTask();
-            //createAgents(3);
+           Parser p = new Parser("src/Planning/domain06.pddl", "src/Planning/task07.pddl");
+           StateHandler sh = new StateHandler(p.getInit());
+           TaskWriter t = new TaskWriter();
+           t.writeFile(sh);
+           createAgents(3);
         } catch (IOException ex) {
             Logger.getLogger(Initialize.class.getName()).log(Level.SEVERE, null, ex);
         }
