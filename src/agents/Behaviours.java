@@ -223,7 +223,7 @@ public class Behaviours
             ArrayList<String> plan = new ArrayList();
             try{
                 String line;                                           
-                ProcessBuilder pb = new ProcessBuilder("python", "src/Planning/pyperplan.py", "src/Planning/domain06.pddl", "src/Planning/task.pddl");
+                ProcessBuilder pb = new ProcessBuilder("python", "src/Planning/pyperplan.py", "src/Planning/domain06.pddl", "src/Planning/task07.pddl");
                 Process p = pb.start();
                 
                 BufferedReader ereader = new BufferedReader (new InputStreamReader (p.getErrorStream()));

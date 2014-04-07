@@ -96,7 +96,7 @@ public class Parser {
                 if (line.charAt(0) == '(')
                 {
                     temp.add(line);
-                    System.out.println(line);
+                    //System.out.println(line);
                 }else if (line.charAt(0) == ')')
                 {
                     brCount--;
@@ -108,6 +108,10 @@ public class Parser {
     public ArrayList<String> getInit()
     {
         return env;
+    }
+    public HashMap<String, ArrayList<String>> getEffects()
+    {
+        return effects;
     }
 }
         

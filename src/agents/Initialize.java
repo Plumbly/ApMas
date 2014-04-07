@@ -33,10 +33,10 @@ public class Initialize extends Agent{
         
         try {
            Parser p = new Parser("src/Planning/domain06.pddl", "src/Planning/task07.pddl");
-           StateHandler sh = new StateHandler(p.getInit());
-           TaskWriter t = new TaskWriter();
-           t.writeFile(sh);
-           createAgents(3);
+           StateHandler sh = new StateHandler(p.getInit(), p.getEffects());
+           //TaskWriter t = new TaskWriter();
+           //t.writeFile(sh);
+           //createAgents(3);
         } catch (IOException ex) {
             Logger.getLogger(Initialize.class.getName()).log(Level.SEVERE, null, ex);
         }
