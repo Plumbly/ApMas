@@ -34,7 +34,7 @@
       (is-moving airplane_CFBEG)
 
       (is-pushing airplane_DFBOY)
-      move_seg_bwy_0_1300_seg_27_0_150_south_south_medium
+      
 
       (not_blocked seg_09Thresh_0_100 airplane_CFBEG)
       (not_blocked seg_09Help_0_100 airplane_CFBEG)

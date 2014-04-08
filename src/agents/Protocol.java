@@ -4,6 +4,8 @@
  */
 package agents;
 
+import agents.GenericAgent.sendArguments;
+import agents.LeaderAgent.computeArgs;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -25,22 +27,22 @@ public class Protocol {
          switch(perf)
          {
              case(ACLMessage.CFP):
-                 a.addBehaviour(new Behaviours.sendArguments(a));
+                 a.addBehaviour(new sendArguments(a));
                  break;
              case(ACLMessage.PROPOSE):
                  
                  if (!isBargaining)
                  {
-                     b = new Behaviours.computeArgs(a);
+                     b = new computeArgs(a, msg);
                      a.addBehaviour(b);
                      isBargaining = true;                                                                                                                                                              
                  }
-                 ArrayList<String> plan = new ArrayList();
-                 plan =(ArrayList<String>) msg.getContentObject();
-                 HashMap<AID, ArrayList<String>> temp = new HashMap();
-                 temp.put(msg.getSender(), plan);
-                 Behaviours.plans.putAll(temp);
-                 break;
+                 if (b.done())
+                 {
+                     isBargaining = false;
+                 }
+                 
+                 
              case (ACLMessage.INFORM):
                  ACLMessage reply = msg.createReply();
                  reply.setPerformative(ACLMessage.CONFIRM);
