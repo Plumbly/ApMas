@@ -4,9 +4,13 @@
  */
 package environment;
 
+import PddlParser.Parser;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,13 +19,24 @@ import java.util.HashMap;
 public class StateHandler {
     private ArrayList<String> state;
     private HashMap<String, ArrayList<String>> effects;
-    public StateHandler(ArrayList<String> state,  HashMap<String, ArrayList<String>> effects)
-    {
-        this.state = state;
-        this.effects = effects;
-        updateState("move_seg_Rwy_0_1300_seg_27_0_150_south_south_medium", "airplane_CFBEG");
-        updateState("move_seg_27_0_150_seg_B_27_0_100_south_north_medium", "airplane_CFBEG");
+    public StateHandler()
+    {     
         
+        //updateState("move_seg_rwy_0_1300_seg_27_0_150_south_south_medium", "airplane_cfbeg");
+        //updateState("move_seg_27_0_150_seg_b_27_0_100_south_north_medium", "airplane_cfbeg");
+        
+    }
+    public void initEnv()
+    {
+        Parser p = new Parser();
+        try {            
+            p.parseDomain("src/Planning/domain06.pddl");
+            p.parseTask("src/Planning/task07.pddl");
+        } catch (IOException ex) {
+            Logger.getLogger(StateHandler.class.getName()).log(Level.SEVERE, null, ex);
+        }     
+        state = p.getInit();
+        effects = p.getEffects();
     }
     
     public void updateState(String action, String parameter)
@@ -31,7 +46,7 @@ public class StateHandler {
         {
             if (s.contains("?a"))
             {
-                 s = s.replaceAll("\\?a", parameter);
+             s = s.replaceAll("\\?a", parameter);
             }
             String[] parts = s.trim().split(" ");
             if (parts[0].trim().equals("(not"))
@@ -53,6 +68,13 @@ public class StateHandler {
     {
         return state;
     }
-    
+    public void setState(ArrayList<String> state)
+    {
+       this.state = state; 
+    }
+    public void setEffects(HashMap<String, ArrayList<String>> effects)
+    {
+        this.effects = effects;
+    }
     
 }

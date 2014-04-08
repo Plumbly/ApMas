@@ -23,16 +23,14 @@ public class Parser {
     private ArrayList<String> goals;
     private ArrayList<String> env;
     
-    public Parser(String domain, String task) throws IOException{                   
+    public Parser(){                   
             preds = new ArrayList();
             goals = new ArrayList();
             env = new ArrayList();
             preCond = new HashMap();
-            effects = new HashMap();
-            parseDomain(domain);
-            parseTask(task);
+            effects = new HashMap();            
         }
-    private void parseDomain(String domain) throws IOException
+    public void parseDomain(String domain) throws IOException
     {
         BufferedReader reader = new BufferedReader(new FileReader(domain));
         String line;
@@ -43,12 +41,13 @@ public class Parser {
                     preds = readIn(reader);
                     break;
                 case "(:action":
-                    readAction(reader, parts[1].trim());
+                    readAction(reader, parts[1].trim().toLowerCase());
                     break;
             }                    
-        }        
+        }
+        reader.close();
     }
-    private void parseTask(String task) throws FileNotFoundException, IOException
+    public void parseTask(String task) throws FileNotFoundException, IOException
     {
         BufferedReader reader = new BufferedReader(new FileReader(task));
         String line;
@@ -62,7 +61,8 @@ public class Parser {
                     goals = readIn(reader);
                     break;
             }                    
-        }       
+        }
+        reader.close();
     }
     private void readAction(BufferedReader reader, String action) throws IOException
     { 
@@ -95,7 +95,7 @@ public class Parser {
             {                        
                 if (line.charAt(0) == '(')
                 {
-                    temp.add(line);
+                    temp.add(line.toLowerCase());
                     //System.out.println(line);
                 }else if (line.charAt(0) == ')')
                 {
@@ -113,6 +113,7 @@ public class Parser {
     {
         return effects;
     }
+       
 }
         
     

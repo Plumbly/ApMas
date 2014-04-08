@@ -16,6 +16,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,17 +30,14 @@ import java.util.logging.Logger;
  * @author Plumbly
  */
 public class Initialize extends Agent{
-    public void setup(){ 
+    public void setup(){        
+            
+            
+            //TaskWriter t = new TaskWriter();
+            //t.writeFile(sh);
+            createAgents(3);
         
-        try {
-           Parser p = new Parser("src/Planning/domain06.pddl", "src/Planning/task07.pddl");
-           StateHandler sh = new StateHandler(p.getInit(), p.getEffects());
-           //TaskWriter t = new TaskWriter();
-           //t.writeFile(sh);
-           //createAgents(3);
-        } catch (IOException ex) {
-            Logger.getLogger(Initialize.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }   
     public void createAgents(int noAgents) 
     {   

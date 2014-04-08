@@ -37,8 +37,7 @@ import jade.domain.FIPAException;
             }
             catch (FIPAException fe) {
                 fe.printStackTrace(); 
-            }
-            
+            }            
             addBehaviour(new Behaviours.Receive(this));        
         }  
         

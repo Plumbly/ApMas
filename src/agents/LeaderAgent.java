@@ -17,7 +17,7 @@ public class LeaderAgent extends Agent
         protected void setup()
         {
             addBehaviour(new Behaviours.Receive(this));
-            addBehaviour(new Behaviours.Leader(this));            
+            addBehaviour(new Behaviours.requestArguments(this));            
         }
         
         

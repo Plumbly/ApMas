@@ -2,6 +2,7 @@ package agents;
 
 
 import Argumentation.ArgFw;
+import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -15,11 +16,12 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.lang.acl.UnreadableException;
 import java.io.BufferedReader;
+
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
+
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,8 +30,10 @@ import java.util.logging.Logger;
 public class Behaviours
 {   
     private static int noReplied;
-    private static int noAgents;  
+    private static int noAgents;
+    public static StateHandler sh;
     public static HashMap<AID, ArrayList<String>> plans = new HashMap<>();
+    
     static class sendArguments extends SimpleBehaviour 
     {   
         public sendArguments(Agent a) { 
@@ -37,14 +41,11 @@ public class Behaviours
         }
         
         public void action()
-        {
-            
-                      
+        {                                  
             ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
             System.out.println("Sending Arguments.");
             //Object[] arg = myAgent.getArguments();
-            //String temp  = arg[0].toString();
-            
+            //String temp  = arg[0].toString();           
             try{
                 msg.setContentObject(invokePlan());
             }catch (Exception e){                
@@ -85,16 +86,25 @@ public class Behaviours
         }
         
     }
-    static class Leader extends SimpleBehaviour
+    static class Leader extends OneShotBehaviour
+    {
+        public void action()
+        {
+            sh = new StateHandler();
+            sh.initEnv();
+        }
+    } 
+    static class requestArguments extends SimpleBehaviour
     {
         private boolean isDone = false;
         private final long timeout = 5000;
         private long wakeupTime;
-        public Leader(Agent a){           
+        public requestArguments(Agent a){           
             super(a);
         }
-        public void onStart() {
-            wakeupTime = System.currentTimeMillis() + timeout;
+        public void onStart() 
+        {
+            wakeupTime = System.currentTimeMillis() + timeout;            
         }
         public void action()
         {
@@ -130,7 +140,7 @@ public class Behaviours
         public boolean done(){
             return isDone;
         }
-    } 
+    }
     
     
     static class computeArgs extends SimpleBehaviour
