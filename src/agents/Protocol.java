@@ -19,30 +19,18 @@ import java.util.HashMap;
  * @author Plumbly
  */
 public class Protocol {
-    private static Boolean isBargaining = false;
+    
     private static Behaviour b = null;
     public static void exectuteAction(Agent a, int perf, ACLMessage msg) throws UnreadableException
     {    
         
          switch(perf)
          {
-             case(ACLMessage.CFP):
+             case(ACLMessage.CFP):                
                  a.addBehaviour(new sendArguments(a));
                  break;
-             case(ACLMessage.PROPOSE):
-                 
-                 if (!isBargaining)
-                 {
-                     b = new computeArgs(a, msg);
-                     a.addBehaviour(b);
-                     isBargaining = true;                                                                                                                                                              
-                 }
-                 if (b.done())
-                 {
-                     isBargaining = false;
-                 }
-                 
-                 
+             case(ACLMessage.PROPOSE):                 
+                 break;                                  
              case (ACLMessage.INFORM):
                  ACLMessage reply = msg.createReply();
                  reply.setPerformative(ACLMessage.CONFIRM);
@@ -50,8 +38,7 @@ public class Protocol {
                  a.doWait(5000);
                  a.send(reply); 
                  break;
-             case (ACLMessage.CONFIRM):
-                 
+             case (ACLMessage.CONFIRM):                 
                  break;
          }
     }

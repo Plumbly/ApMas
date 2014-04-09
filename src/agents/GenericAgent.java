@@ -3,9 +3,12 @@
  * and open the template in the editor.
  */
 package agents;
+import PddlParser.TaskWriter;
+import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
+import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -28,11 +31,10 @@ import java.util.logging.Logger;
     {   
         private String goal;
         protected void setup()
-        {   
-            String goal = null;
-            Object[] arg = new Object[1]; 
-            arg[0] = goal;
-            this.setArguments(arg);
+        {              
+            Object[] arg = getArguments();
+            goal = (String) arg[0];
+            
             
             System.out.println("Registering " + getLocalName() + " with the DFservice.");
             DFAgentDescription dfd = new DFAgentDescription();
@@ -48,10 +50,11 @@ import java.util.logging.Logger;
             catch (FIPAException fe) {
                 fe.printStackTrace(); 
             }            
-            addBehaviour(new Receive(this));        
+            addBehaviour(new Receive(this)); 
+            
         }
         
-        static class Receive extends CyclicBehaviour 
+        public class Receive extends CyclicBehaviour 
     {
         public Receive(Agent a) { 
              super(a);  
@@ -59,7 +62,7 @@ import java.util.logging.Logger;
         
         public void action()
         {
-            ACLMessage msg = this.myAgent.receive();
+            ACLMessage msg = receive();
             if (msg != null)
             {                            
                     try {
@@ -76,34 +79,44 @@ import java.util.logging.Logger;
         
     }
         
-        static class sendArguments extends SimpleBehaviour 
-    {   
-        public sendArguments(Agent a) { 
-             super(a);  
-        }
+        public static class sendArguments extends OneShotBehaviour 
+        {   
+            public sendArguments(Agent a) { 
+                super(a);  
+            }
         
         public void action()
         {                                  
             ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
-            System.out.println("Sending Arguments.");
-            //Object[] arg = myAgent.getArguments();
-            //String temp  = arg[0].toString();           
+            System.out.println("Sending Arguments.");                     
             try{
-                msg.setContentObject(invokePlan());
+                //msg.setContentObject(invokePlan());
             }catch (Exception e){                
             }            
-            msg.addReceiver(new AID("agent0", AID.ISLOCALNAME));
-            myAgent.send(msg);
+            msg.addReceiver(new AID("Leader", AID.ISLOCALNAME));
+            //myAgent.send(msg);
+            ArrayList<String> plan = invokePlan();
+            for (String action : plan)
+            {
+                String[] parts = action.split(" ");
+                StateHandler.updateState(parts[0].trim(), parts[1].trim());
+            }
+            ArrayList<String> state = StateHandler.getState();
         }
         
-        public  boolean done() {  return (true); }
         
-        private static ArrayList<String> invokePlan() 
+        
+        public ArrayList<String> invokePlan() 
         {   
+            //TaskWriter tw = new TaskWriter();
+            //Object[] arg = myAgent.getArguments();
+            
+            //String file = tw.writeFile((String) arg[0], myAgent);
+            String file = "src/Planning/task07.pddl";
             ArrayList<String> plan = new ArrayList();
             try{
                 String line;                                           
-                ProcessBuilder pb = new ProcessBuilder("python", "src/Planning/pyperplan.py", "src/Planning/domain06.pddl", "src/Planning/task07.pddl");
+                ProcessBuilder pb = new ProcessBuilder("python", "src/Planning/pyperplan.py", "src/Planning/domain06.pddl", file);
                 Process p = pb.start();
                 
                 BufferedReader ereader = new BufferedReader (new InputStreamReader (p.getErrorStream()));
@@ -119,7 +132,7 @@ import java.util.logging.Logger;
                     int indexOfOpenBracket = line.indexOf("(");
                     int indexOfLastBracket = line.lastIndexOf(")");
                     String action = line.substring(indexOfOpenBracket+1, indexOfLastBracket);
-                    plan.add(action);
+                    plan.add(action.toLowerCase());
                 System.out.println(action);
                 
                 }

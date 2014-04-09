@@ -70,13 +70,29 @@ public class Parser {
         while(!isDone)
         {             
            String line = reader.readLine().trim();
-           String[] parts = line.split(" ");
-            switch (parts[0].trim()) {
+           
+           String[] tokens = line.split("\\(and");
+           String regex = "(?=\\()|(?<=\\)\\d)";
+            switch (tokens[0].trim()) {               
                 case ":precondition":
                     preCond.put(action, readIn(reader));
+                    if (tokens.length == 2)
+                    {
+                        //int indexOfOpenBracket = tokens[1].indexOf("(");
+                        //int indexOfLastBracket = tokens[1].lastIndexOf(")") + 1;
+                        //String l  = tokens[1].substring(indexOfOpenBracket, indexOfLastBracket);
+                        preCond.get(action).add(tokens[1].trim().toLowerCase());
+                    }
                     break;
                 case ":effect":
                     effects.put(action, readIn(reader));
+                    if (tokens.length == 2)
+                    {
+                        //int indexOfOpenBracket = tokens[1].indexOf("(");
+                        //int indexOfLastBracket = tokens[1].lastIndexOf(")") + 1;
+                        //String l  = tokens[1].substring(indexOfOpenBracket, indexOfLastBracket);
+                        effects.get(action).add(tokens[1].trim().toLowerCase());
+                    }
                     isDone = true;
                     break;
             }
@@ -112,6 +128,11 @@ public class Parser {
     public HashMap<String, ArrayList<String>> getEffects()
     {
         return effects;
+    }
+    
+    public ArrayList<String> getGoals()
+    {
+        return goals;
     }
        
 }

@@ -17,8 +17,9 @@ import java.util.logging.Logger;
  * @author Plumbly
  */
 public class StateHandler {
-    private ArrayList<String> state;
-    private HashMap<String, ArrayList<String>> effects;
+    private static ArrayList<String> state;
+    private static HashMap<String, ArrayList<String>> effects;
+    private static ArrayList<String> goals;
     public StateHandler()
     {     
         
@@ -26,7 +27,7 @@ public class StateHandler {
         //updateState("move_seg_27_0_150_seg_b_27_0_100_south_north_medium", "airplane_cfbeg");
         
     }
-    public void initEnv()
+    public static void initEnv()
     {
         Parser p = new Parser();
         try {            
@@ -37,10 +38,11 @@ public class StateHandler {
         }     
         state = p.getInit();
         effects = p.getEffects();
+        goals = p.getGoals();
     }
     
-    public void updateState(String action, String parameter)
-    {
+    public static void updateState(String action, String parameter)
+    {       
         ArrayList<String> tmp = effects.get(action);
         for (String s : tmp)
         {
@@ -48,8 +50,8 @@ public class StateHandler {
             {
              s = s.replaceAll("\\?a", parameter);
             }
-            String[] parts = s.trim().split(" ");
-            if (parts[0].trim().equals("(not"))
+            
+            if (s.trim().substring(0,6).equals("(not ("))
             {
                 
                String t = s.trim().substring(5, s.length()-1);               
@@ -59,22 +61,21 @@ public class StateHandler {
             }
         }
         Collections.sort(state);
+        System.out.println("\n State After Applying action: " + action + " With Parameter: " + parameter);
         for (String a : state)
-        {
+        {           
             System.out.println(a);
-        }
+        } 
+        System.out.println(" ");
     }
-    public ArrayList<String> getState()
+    public static ArrayList<String> getState()
     {
         return state;
     }
-    public void setState(ArrayList<String> state)
+    public static ArrayList<String> getGoals()
     {
-       this.state = state; 
+        return goals;
     }
-    public void setEffects(HashMap<String, ArrayList<String>> effects)
-    {
-        this.effects = effects;
-    }
+    
     
 }

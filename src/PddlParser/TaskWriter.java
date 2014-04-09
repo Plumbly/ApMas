@@ -17,17 +17,17 @@ import java.io.Writer;
  * @author Plumbly
  */
 public class TaskWriter {
-    public void writeFile(StateHandler state, String goal, Agent agent){
+    public String writeFile(String goal, Agent agent){
         Writer writer = null;
-        try {
-            writer = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream("src/Planning/" + agent.getLocalName()+"task.pddl"), "utf-8"));
+        String file = "src/Planning/" + agent.getLocalName()+"task.pddl";
+        try {          
+            writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), "utf-8"));
             String output = "";
             output += "(define (problem PROBLEM_X)\n";
             output += "(:domain airport_fixed_structure)\n";
             output += "(:objects)\n";
             output += "(:init\n";
-            for (String a : state.getState())
+            for (String a : StateHandler.getState())
             {
                 output += a + "\n";
             }
@@ -40,6 +40,7 @@ public class TaskWriter {
         } finally {
             try {writer.close();} catch (Exception ex) {}
         }
+        return file;
     }
     
 }

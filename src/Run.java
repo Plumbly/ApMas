@@ -1,5 +1,4 @@
 
-import agents.Initialize;
 import jade.Boot;
 
 /*
@@ -17,7 +16,7 @@ public class Run {
     {       
         String[] param = new String[ 2 ];
         param[ 0 ] = "-gui";
-        param[ 1 ] = "Initialize:agents.Initialize";
+        param[ 1 ] = "Leader:agents.LeaderAgent";
         Boot.main( param );
         
     }

@@ -8,6 +8,7 @@ import Argumentation.ArgFw;
 import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
@@ -17,6 +18,8 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
+import jade.wrapper.AgentController;
+import jade.wrapper.ContainerController;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -32,24 +35,52 @@ import java.util.logging.Logger;
 public class LeaderAgent extends Agent
     {
         private static int noReplied;
-        private static int noAgents;
         public static HashMap<AID, ArrayList<String>> plans = new HashMap<>();
+        private static Boolean isBargaining = false;
+        
+               
         protected void setup()
         {
             addBehaviour(new Receive(this));
+            addBehaviour(new Leader(this));
             addBehaviour(new requestArguments(this));            
         }
         
-        static class Leader extends OneShotBehaviour
+        public class Leader extends OneShotBehaviour
     {
+            public Leader(Agent a) { 
+             super(a);  
+        }
         public void action()
         {
-            
+            StateHandler.initEnv();
+            ArrayList<String> goals = StateHandler.getGoals();
+            createAgents(goals);
         }
+        
+        public void createAgents(ArrayList<String> goals) 
+    {   
+        //goals.size();
+        AgentController agent;
+        ContainerController cont = getContainerController();
+        for (int i = 0; i < 1; i++)
+        {   
+            Object[] args = new Object[1];
+            args[0] = goals.get(i);
+            try {                                                                                    
+                agent = cont.createNewAgent("agent" + i,"agents.GenericAgent", args);                                    
+                agent.start();
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
     }
         
     static class Receive extends CyclicBehaviour 
     {
+        Behaviour b;
         public Receive(Agent a) { 
              super(a);  
         }
@@ -62,13 +93,28 @@ public class LeaderAgent extends Agent
                 if (msg.getPerformative() == ACLMessage.CONFIRM)
                 {                 
                     noReplied++;
+                }else if (msg.getPerformative() == ACLMessage.PROPOSE){
+                    try {
+                        if (!isBargaining)
+                        {
+                            b = new computeArgs(myAgent, msg);                    
+                            myAgent.addBehaviour(b);                     
+                            isBargaining = true;                                                                                                                                                              
+                        }
+                        ArrayList<String> plan = new ArrayList();
+                        plan =(ArrayList<String>) msg.getContentObject();
+                        HashMap<AID, ArrayList<String>> temp = new HashMap();
+                        temp.put(msg.getSender(), plan);
+                        plans.putAll(temp);
+                    }catch (UnreadableException ex) {
+                        Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);                                                   
+                    }                    
                 }else{
                     try {                    
                         Protocol.exectuteAction(myAgent, msg.getPerformative(), msg);
-                    } catch (UnreadableException ex) {
+                    }catch (UnreadableException ex) {
                         Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                   
+                    }                                                  
                 }
                 System.out.println("I, " + myAgent.getLocalName()+ " have received a message from " 
                         + msg.getSender().getLocalName() + " with Content: " + msg.getContent() + ".");
@@ -136,7 +182,8 @@ public class LeaderAgent extends Agent
         private boolean isDone = false;
         private long wakeupTime;
         private ACLMessage msg;
-        public static ArgFw af;       
+        public static ArgFw af;
+        
         public computeArgs(Agent a, ACLMessage msg)
         {
             super(a);
@@ -155,32 +202,26 @@ public class LeaderAgent extends Agent
                 myAgent.addBehaviour(new giveOrders(myAgent, plan));
                 isDone = true;
                 plans.clear();
-                wakeupTime = System.currentTimeMillis() + timeout;
+                
                 
             }else{
-                if (msg != null)
-                {
-                    try {
-                        ArrayList<String> plan = new ArrayList();
-                        plan =(ArrayList<String>) msg.getContentObject();
-                        HashMap<AID, ArrayList<String>> temp = new HashMap();
-                        temp.put(msg.getSender(), plan);
-                        plans.putAll(temp);                      
-                    } catch (UnreadableException ex) {
-                        Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
                 block(dt);
-            }
-            //System.out.println("Sending arguments to AF.");            
+            }           
+            //System.out.println("Sending arguments to AF.");                       
+        }
+        
+        public static void addPlan(ACLMessage msg)
+        {            
             
         }
-        public boolean done(){return isDone;}
-    }
+          public boolean done(){return isDone;}      
+        }
+        
+    
         static class giveOrders extends SimpleBehaviour
     {
         public boolean isComplete = false;
-        
+        private static int noAgents;
         private static ArrayList<HashMap> plan;
                
         public giveOrders(Agent a, ArrayList<HashMap> plan)
