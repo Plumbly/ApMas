@@ -90,29 +90,20 @@ import java.util.logging.Logger;
             ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
             System.out.println("Sending Arguments.");                     
             try{
-                //msg.setContentObject(invokePlan());
+                msg.setContentObject(invokePlan());
             }catch (Exception e){                
             }            
             msg.addReceiver(new AID("Leader", AID.ISLOCALNAME));
-            //myAgent.send(msg);
-            ArrayList<String> plan = invokePlan();
-            for (String action : plan)
-            {
-                String[] parts = action.split(" ");
-                StateHandler.updateState(parts[0].trim(), parts[1].trim());
-            }
-            ArrayList<String> state = StateHandler.getState();
+            myAgent.send(msg);                     
         }
         
         
         
         public ArrayList<String> invokePlan() 
         {   
-            //TaskWriter tw = new TaskWriter();
-            //Object[] arg = myAgent.getArguments();
-            
-            //String file = tw.writeFile((String) arg[0], myAgent);
-            String file = "src/Planning/task07.pddl";
+            TaskWriter tw = new TaskWriter();
+            Object[] arg = myAgent.getArguments();           
+            String file = tw.writeFile((String) arg[0], myAgent);            
             ArrayList<String> plan = new ArrayList();
             try{
                 String line;                                           

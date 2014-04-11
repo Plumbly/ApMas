@@ -59,11 +59,10 @@ public class LeaderAgent extends Agent
         }
         
         public void createAgents(ArrayList<String> goals) 
-    {   
-        //goals.size();
+    {          
         AgentController agent;
         ContainerController cont = getContainerController();
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < goals.size(); i++)
         {   
             Object[] args = new Object[1];
             args[0] = goals.get(i);

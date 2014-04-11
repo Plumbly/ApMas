@@ -77,20 +77,14 @@ public class Parser {
                 case ":precondition":
                     preCond.put(action, readIn(reader));
                     if (tokens.length == 2)
-                    {
-                        //int indexOfOpenBracket = tokens[1].indexOf("(");
-                        //int indexOfLastBracket = tokens[1].lastIndexOf(")") + 1;
-                        //String l  = tokens[1].substring(indexOfOpenBracket, indexOfLastBracket);
+                    {                        
                         preCond.get(action).add(tokens[1].trim().toLowerCase());
                     }
                     break;
                 case ":effect":
                     effects.put(action, readIn(reader));
                     if (tokens.length == 2)
-                    {
-                        //int indexOfOpenBracket = tokens[1].indexOf("(");
-                        //int indexOfLastBracket = tokens[1].lastIndexOf(")") + 1;
-                        //String l  = tokens[1].substring(indexOfOpenBracket, indexOfLastBracket);
+                    {                       
                         effects.get(action).add(tokens[1].trim().toLowerCase());
                     }
                     isDone = true;
