@@ -119,6 +119,12 @@ public class Parser {
     {
         return env;
     }
+    
+    public HashMap<String, ArrayList<String>> getPreconds()
+    {
+        return preCond;
+    }
+    
     public HashMap<String, ArrayList<String>> getEffects()
     {
         return effects;
