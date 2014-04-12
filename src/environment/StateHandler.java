@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 public class StateHandler {
     private static ArrayList<String> state;
     private static HashMap<String, ArrayList<String>> effects;
+    private static HashMap<String, ArrayList<String>> preCond;
     private static ArrayList<String> goals;
     public StateHandler()
     {     
@@ -37,6 +38,7 @@ public class StateHandler {
             Logger.getLogger(StateHandler.class.getName()).log(Level.SEVERE, null, ex);
         }     
         state = p.getInit();
+        preCond = p.getPreconds();
         effects = p.getEffects();
         goals = p.getGoals();
     }
@@ -75,6 +77,16 @@ public class StateHandler {
     public static ArrayList<String> getGoals()
     {
         return goals;
+    }
+    
+    public static ArrayList<String> get_Action_Preconditions(String action)
+    {
+        return preCond.get(action);
+    }
+    
+    public static ArrayList<String> get_Action_Effects(String action)
+    {
+        return effects.get(action);
     }
     
     
