@@ -53,11 +53,11 @@ public class ArgFw {
         
     }
     
-    private void checkUndercut()
+    private void checkPrecon()
     {
     
     }
-    private void checkRebut()
+    private void checkEffects()
     {
         
     }
