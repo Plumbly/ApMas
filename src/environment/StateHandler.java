@@ -50,7 +50,7 @@ public class StateHandler {
         {
             if (s.contains("?a"))
             {
-             s = s.replaceAll("\\?a", parameter);
+                s = s.replaceAll("\\?a", parameter);
             }
             
             if (s.trim().substring(0,6).equals("(not ("))

@@ -29,11 +29,11 @@ public class TaskWriter {
             output += "(:init\n";
             for (String a : StateHandler.getState())
             {
-                output += a + "\n";
+                output += "\t" + a + "\n";
             }
             output += ")\n";
             output += "(:goal     (and\n";
-            output += goal;
+            output += "\t" + goal;
             output += ")\n" + ")\n" + ")";           
             writer.write(output);
         } catch (IOException ex) {
