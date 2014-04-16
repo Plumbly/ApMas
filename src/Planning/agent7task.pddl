@@ -2754,6 +2754,6 @@
 	(occupied seg_p118_0_76)
 )
 (:goal     (and
-	(and)
+	(airborne airplane_daew6 seg_08l_0_80))
 )
 )

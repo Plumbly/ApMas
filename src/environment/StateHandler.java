@@ -22,18 +22,15 @@ public class StateHandler {
     private static HashMap<String, ArrayList<String>> preCond;
     private static ArrayList<String> goals;
     public StateHandler()
-    {     
-        
-        //updateState("move_seg_rwy_0_1300_seg_27_0_150_south_south_medium", "airplane_cfbeg");
-        //updateState("move_seg_27_0_150_seg_b_27_0_100_south_north_medium", "airplane_cfbeg");
+    {                    
         
     }
     public static void initEnv()
     {
         Parser p = new Parser();
         try {            
-            p.parseDomain("src/Planning/domain06.pddl");
-            p.parseTask("src/Planning/task07.pddl");
+            p.parseDomain("src/Planning/domain30.pddl");
+            p.parseTask("src/Planning/task30.pddl");
         } catch (IOException ex) {
             Logger.getLogger(StateHandler.class.getName()).log(Level.SEVERE, null, ex);
         }     
