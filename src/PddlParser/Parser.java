@@ -4,6 +4,7 @@
  */
 package PddlParser;
 
+import environment.Action;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -18,8 +19,7 @@ import java.util.HashMap;
 public class Parser {
     
     private ArrayList<String> preds;
-    private HashMap<String, ArrayList<String>> preCond;
-    private HashMap<String, ArrayList<String>> effects;
+    private ArrayList<Action> actions;    
     private ArrayList<String> goals;
     private ArrayList<String> env;
     
@@ -27,8 +27,7 @@ public class Parser {
             preds = new ArrayList();
             goals = new ArrayList();
             env = new ArrayList();
-            preCond = new HashMap();
-            effects = new HashMap();            
+            actions = new ArrayList();            
         }
     public void parseDomain(String domain) throws IOException
     {
@@ -67,30 +66,31 @@ public class Parser {
     private void readAction(BufferedReader reader, String action) throws IOException
     { 
         boolean isDone = false;
+        ArrayList<String> preCons = new ArrayList();
+        ArrayList<String> effects = new ArrayList();
         while(!isDone)
         {             
-           String line = reader.readLine().trim();
-           
-           String[] tokens = line.split("\\(and");
-           String regex = "(?=\\()|(?<=\\)\\d)";
+           String line = reader.readLine().trim();           
+           String[] tokens = line.split("\\(and");         
             switch (tokens[0].trim()) {               
                 case ":precondition":
-                    preCond.put(action, readIn(reader));
+                    preCons = readIn(reader);                    
                     if (tokens.length == 2)
                     {                        
-                        preCond.get(action).add(tokens[1].trim().toLowerCase());
+                        preCons.add(tokens[1].trim().toLowerCase());
                     }
                     break;
                 case ":effect":
-                    effects.put(action, readIn(reader));
+                    effects = readIn(reader);                    
                     if (tokens.length == 2)
                     {                       
-                        effects.get(action).add(tokens[1].trim().toLowerCase());
+                        effects.add(tokens[1].trim().toLowerCase());
                     }
                     isDone = true;
                     break;
             }
         }
+        actions.add(new Action(action, preCons, effects));
                   
     }
     private ArrayList<String> readIn(BufferedReader reader) throws IOException
@@ -120,15 +120,12 @@ public class Parser {
         return env;
     }
     
-    public HashMap<String, ArrayList<String>> getPreconds()
+    public ArrayList<Action> getActions()
     {
-        return preCond;
+        return actions;
     }
     
-    public HashMap<String, ArrayList<String>> getEffects()
-    {
-        return effects;
-    }
+    
     
     public ArrayList<String> getGoals()
     {

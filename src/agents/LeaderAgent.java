@@ -5,6 +5,8 @@
 package agents;
 
 import Argumentation.ArgFw;
+import Argumentation.Argument;
+import environment.Action;
 import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
@@ -21,6 +23,7 @@ import jade.lang.acl.UnreadableException;
 import jade.wrapper.AgentController;
 import jade.wrapper.ContainerController;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -35,7 +38,7 @@ import java.util.logging.Logger;
 public class LeaderAgent extends Agent
     {
         private static int noReplied;
-        public static HashMap<AID, ArrayList<String>> plans = new HashMap<>();
+        public static ArrayList<Argument> plans = new ArrayList();
         private static Boolean isBargaining = false;
         
                
@@ -99,12 +102,9 @@ public class LeaderAgent extends Agent
                             b = new computeArgs(myAgent, msg);                    
                             myAgent.addBehaviour(b);                     
                             isBargaining = true;                                                                                                                                                              
-                        }
-                        ArrayList<String> plan = new ArrayList();
-                        plan =(ArrayList<String>) msg.getContentObject();
-                        HashMap<AID, ArrayList<String>> temp = new HashMap();
-                        temp.put(msg.getSender(), plan);
-                        plans.putAll(temp);
+                        }                        
+                        Argument plan =(Argument) msg.getContentObject();                                                
+                        plans.add(plan);
                     }catch (UnreadableException ex) {
                         Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);                                                   
                     }                    
@@ -115,8 +115,8 @@ public class LeaderAgent extends Agent
                         Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }                                                  
                 }
-                System.out.println("I, " + myAgent.getLocalName()+ " have received a message from " 
-                        + msg.getSender().getLocalName() + " with Content: " + msg.getContent() + ".");
+                //System.out.println("I, " + myAgent.getLocalName()+ " have received a message from " 
+                        //+ msg.getSender().getLocalName() + " with Content: " + msg.getContent() + ".");
             }else{
                 block();
             }
@@ -179,14 +179,12 @@ public class LeaderAgent extends Agent
     {
         private final long timeout = 2000;
         private boolean isDone = false;
-        private long wakeupTime;
-        private ACLMessage msg;
+        private long wakeupTime;      
         public static ArgFw af;
         
         public computeArgs(Agent a, ACLMessage msg)
         {
-            super(a);
-            this.msg = msg;           
+            super(a);                      
             af = new ArgFw();           
         }
         
@@ -197,7 +195,7 @@ public class LeaderAgent extends Agent
         {
             long dt = wakeupTime - System.currentTimeMillis();
             if (dt <= 0) {
-                ArrayList<HashMap> plan = af.computeArguments(plans);            
+                ArrayList<HashMap<AID,Action>> plan = af.computeArguments(plans);            
                 myAgent.addBehaviour(new giveOrders(myAgent, plan));
                 isDone = true;
                 plans.clear();
@@ -205,14 +203,9 @@ public class LeaderAgent extends Agent
                 
             }else{
                 block(dt);
-            }           
-            //System.out.println("Sending arguments to AF.");                       
+            }                                            
         }
-        
-        public static void addPlan(ACLMessage msg)
-        {            
-            
-        }
+              
           public boolean done(){return isDone;}      
         }
         
@@ -221,9 +214,9 @@ public class LeaderAgent extends Agent
     {
         public boolean isComplete = false;
         private static int noAgents;
-        private static ArrayList<HashMap> plan;
+        private static ArrayList<HashMap<AID, Action>> plan;
                
-        public giveOrders(Agent a, ArrayList<HashMap> plan)
+        public giveOrders(Agent a, ArrayList<HashMap<AID, Action>> plan)
         {
             super(a);
             this.plan = plan;            
@@ -231,7 +224,7 @@ public class LeaderAgent extends Agent
         
         public void action()
         {            
-            HashMap<AID,String> actions = null;
+            HashMap<AID,Action> actions = null;
             
             
             if (noReplied == noAgents) 
@@ -241,10 +234,14 @@ public class LeaderAgent extends Agent
                 if(!plan.isEmpty()){
                     actions = plan.get(0);
                     plan.remove(0);
-                    for (Map.Entry<AID, String> entry : actions.entrySet())
+                    for (Map.Entry<AID, Action> entry : actions.entrySet())
                     {
                         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-                        msg.setContent("Do action " + entry.getValue());
+                        try {
+                            msg.setContentObject(entry.getValue());
+                        } catch (IOException ex) {
+                            Logger.getLogger(LeaderAgent.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                         msg.addReceiver(entry.getKey());
                         noAgents++;
                         myAgent.send(msg);                   

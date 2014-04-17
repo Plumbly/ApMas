@@ -1,0 +1,30 @@
+﻿
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#	modified:   nbproject/project.properties
+#	modified:   src/Argumentation/ArgFw.java
+#	modified:   src/Argumentation/Argument.java
+#	modified:   src/PddlParser/Parser.java
+#	modified:   src/Planning/agent0task.pddl
+#	modified:   src/Planning/agent1task.pddl
+#	deleted:    src/Planning/agent2task.pddl
+#	deleted:    src/Planning/agent3task.pddl
+#	deleted:    src/Planning/agent4task.pddl
+#	deleted:    src/Planning/agent5task.pddl
+#	deleted:    src/Planning/agent6task.pddl
+#	deleted:    src/Planning/agent7task.pddl
+#	deleted:    src/Planning/agent8task.pddl
+#	modified:   src/agents/GenericAgent.java
+#	modified:   src/agents/LeaderAgent.java
+#	modified:   src/agents/Protocol.java
+#	modified:   src/environment/Action.java
+#	modified:   src/environment/StateHandler.java
+#	new file:   src/gui/MainWindow.form
+#	new file:   src/gui/MainWindow.java
+#	renamed:    src/Run.java -> src/start/Run.java
+#
+

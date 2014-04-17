@@ -3,7 +3,9 @@
  * and open the template in the editor.
  */
 package agents;
+import Argumentation.Argument;
 import PddlParser.TaskWriter;
+import environment.Action;
 import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
@@ -18,6 +20,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.UnreadableException;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,8 +73,8 @@ import java.util.logging.Logger;
                     } catch (UnreadableException ex) {
                         Logger.getLogger(GenericAgent.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    System.out.println("I, " + myAgent.getLocalName()+ " have received a message from " 
-                        + msg.getSender().getLocalName() + " with Content: " + msg.getContent() + ".");
+                    //System.out.println("I, " + myAgent.getLocalName()+ " have received a message from " 
+                        //+ msg.getSender().getLocalName() + " with Content: " + msg.getContent() + ".");
             }
                 
             
@@ -90,7 +93,8 @@ import java.util.logging.Logger;
             ACLMessage msg = new ACLMessage(ACLMessage.PROPOSE);
             System.out.println("Sending Arguments.");                     
             try{
-                msg.setContentObject(invokePlan());
+                Argument a = new Argument(myAgent.getAID(),invokePlan());
+                msg.setContentObject(a);
             }catch (Exception e){                
             }            
             msg.addReceiver(new AID("Leader", AID.ISLOCALNAME));
@@ -99,12 +103,12 @@ import java.util.logging.Logger;
         
         
         
-        public ArrayList<String> invokePlan() 
+        public ArrayList<Action> invokePlan() 
         {   
             TaskWriter tw = new TaskWriter();
             Object[] arg = myAgent.getArguments();           
             String file = tw.writeFile((String) arg[0], myAgent);            
-            ArrayList<String> plan = new ArrayList();
+            ArrayList<Action> plan = new ArrayList();
             try{
                 String line;                                           
                 ProcessBuilder pb = new ProcessBuilder("python", "src/Planning/pyperplan.py", "src/Planning/domain06.pddl", file);
@@ -117,15 +121,13 @@ import java.util.logging.Logger;
                 ereader.close();
                 
                 BufferedReader reader = new BufferedReader (new InputStreamReader (p.getInputStream()));
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(" ");
-                    
+                while ((line = reader.readLine()) != null) 
+                {                                     
                     int indexOfOpenBracket = line.indexOf("(");
                     int indexOfLastBracket = line.lastIndexOf(")");
                     String action = line.substring(indexOfOpenBracket+1, indexOfLastBracket);
-                    plan.add(action.toLowerCase());
-                System.out.println(action);
-                
+                    String[] parts = action.split(" ");                    
+                    plan.add(new Action(StateHandler.get_Action_By_Name(parts[0].toLowerCase()), parts[1]));                                
                 }
             }catch (Exception e)
             {

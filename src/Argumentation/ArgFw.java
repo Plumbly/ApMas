@@ -4,114 +4,77 @@
  */
 package Argumentation;
 
-import environment.StateHandler;
+import environment.Action;
 import jade.core.AID;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
 
 /**
  *
  * @author Plumbly
  */
 public class ArgFw {
-    
-    public ArrayList<HashMap> computeArguments(HashMap<AID, ArrayList<String>> args)
-    {
-        HashMap<AID, ArrayList<String>> argument = args;
-        ArrayList<String> ar = new ArrayList();
-        ArrayList<HashMap> plan = new ArrayList();
-        ArrayList<AID> blocked;
-        
-        int totalSize=0;
-        
-        for (Map.Entry<AID, ArrayList<String>> e : argument.entrySet())
-        { 
-                totalSize += e.getValue().size();
-        }
-        ArrayList<String> closed = new ArrayList();
+    private ArrayList<AID> blocked = new ArrayList();
+    public ArrayList<HashMap<AID, Action>> computeArguments(ArrayList<Argument> args)
+    {       
+        ArrayList<String> att = new ArrayList();
+        ArrayList<HashMap<AID, Action>> plan = new ArrayList();              
+        int totalSize= getTotalSize(args);              
+        ArrayList<String> closed = new ArrayList(); // Actions that have already been added to the plan.
         while(totalSize != 0)
-        {
-            blocked = new ArrayList<>();
-            HashMap<AID, String> agentActions = new HashMap<>();
-            
-            for (Map.Entry<AID, ArrayList<String>> e : argument.entrySet())
+        {          
+            HashMap<AID, Action> agentActions = new HashMap<>();            
+            for (Argument a : args)
             {                                      
-                if (!e.getValue().isEmpty())
+                if (!a.isPlanEmpty())
                 {
-                    if (!agentActions.containsValue(e.getValue().get(0)) && !closed.contains(e.getValue().get(0))) // if same argument then just use first occurence
+                    Action action = a.get_Next_Action();
+                    if (agentActions.containsValue(action) || closed.contains(action.toString())) // if same argument then just use first occurence
                     {
-                        agentActions.put(e.getKey(), e.getValue().get(0));                        
-                    }else{
                         totalSize--;
-                        e.getValue().remove(0);
+                        a.remove_Action();
+                    }else{
+                        agentActions.put(a.get_Agent(), action);                        
                     }
                 }                                                          
             }
             
             if (agentActions.size() > 1)
-            {
-               for (Map.Entry<AID, String> e : agentActions.entrySet())
-               {                
-                    for (Map.Entry<AID, String> f : agentActions.entrySet())
-                    {                       
-                        if(!e.getKey().getLocalName().equals(f.getKey().getLocalName())) // makes sure not the same agent
-                        { 
-                            if (!blocked.contains(f.getKey()) && !blocked.contains(e.getKey()))
-                            {
-                                if(checkPreandEffects(e.getValue(), f.getValue()))
-                                {                                   
-                                    ar.add(e.getKey().getLocalName()+ "," + f.getKey().getLocalName());
-                                }                                 
-                                if(checkParameters(e.getValue(), f.getValue()))                              
-                                {
-                                    blocked.add(f.getKey());
-                                }
-                            }
-                        }                         
-                    }
-                }
-               
-               
-               if (!ar.isEmpty())
-               {                                                      
-                   System.out.println("Calculating Semantics");
-                   ArrayList<String> arguments = getAllArguments(ar);
-                   agentActions = constructAttackRelation(arguments,ar, agentActions);                                           
+            {  
+               att = detect_Conflicts(agentActions);
+               if (!att.isEmpty())
+               {                                                                        
+                   ArrayList<String> arguments = getAllArguments(att);
+                   agentActions = computeGroundedExtension(arguments,att, agentActions);                                           
                }
                for (AID k : blocked)
                {
                    agentActions.remove(k);
-               }
-               
+               }               
             }
-            for (AID a : agentActions.keySet())
+            for (Argument a : args)
             {
-                   argument.get(a).remove(0);
-                   closed.add(agentActions.get(a));
-            }
-            if (!agentActions.isEmpty()){plan.add(agentActions);}           
-            totalSize -= agentActions.size();
-        }
-        for (HashMap<AID, String> p : plan)
-        {
-            for (Map.Entry<AID, String> f : p.entrySet())
-            {
-                System.out.println(f.getValue());
+                if (agentActions.containsKey(a.get_Agent()))
+                {
+                   closed.add(a.get_Next_Action().toString());
+                   a.remove_Action();                   
+                }
             }           
-        }
+            plan.add(agentActions);           
+            totalSize -= agentActions.size();
+        }        
         return plan;
     }
     
-    private HashMap<AID, String> constructAttackRelation(ArrayList<String> arguments, ArrayList<String> ar, HashMap<AID, String> agentActions)
+    private HashMap<AID, Action> computeGroundedExtension(ArrayList<String> arguments, ArrayList<String> att, HashMap<AID, Action> agentActions)
     {
         
                       
-        ArrayList<String> IN = new ArrayList(getUnattacked(arguments, ar));
+        ArrayList<String> IN = new ArrayList(getUnattacked(arguments, att));
         ArrayList<String> OUT = new ArrayList();
         ArrayList<String> UNDEC = new ArrayList();       
         List<ArrayList<String>> label = Arrays.asList(IN,OUT,UNDEC);
@@ -119,8 +82,8 @@ public class ArgFw {
         while (!label.equals(label1))
         {
             label1 = Arrays.asList(new ArrayList<>(IN),new ArrayList<>(OUT),new ArrayList<>(UNDEC));
-            IN.addAll(getIn(OUT,IN, ar));
-            OUT.addAll(getOut(IN,OUT, ar));            
+            IN.addAll(getIn(OUT,IN, att));
+            OUT.addAll(getOut(IN,OUT, att));            
         }
         arguments.removeAll(IN);
         arguments.removeAll(OUT);
@@ -129,11 +92,36 @@ public class ArgFw {
         {
             agentActions.remove(new AID(out, AID.ISLOCALNAME));
         }
-        //getChosenAction(IN, agentActions);
+        
         
         return agentActions;
     }
-    
+    private ArrayList<String> detect_Conflicts(HashMap<AID,Action> agentActions)
+    {
+        blocked = new ArrayList();
+        ArrayList<String> att = new ArrayList();
+        for (Map.Entry<AID, Action> e : agentActions.entrySet())
+        {                
+            for (Map.Entry<AID, Action> f : agentActions.entrySet())
+            {                       
+                if(!e.getKey().getLocalName().equals(f.getKey().getLocalName())) // makes sure not the same agent
+                { 
+                    if (!blocked.contains(f.getKey()) && !blocked.contains(e.getKey()))
+                    {
+                        if(checkPreandEffects(e.getValue(), f.getValue()))
+                        {                                   
+                            att.add(e.getKey().getLocalName()+ "," + f.getKey().getLocalName());
+                        }                                 
+                        if(e.getValue().compareParameters(f.getValue()))                              
+                        {
+                            blocked.add(f.getKey());
+                        }
+                    }
+                }                         
+            }
+        }
+        return att;
+    }
     private ArrayList<String> getUnattacked(List<String> arguments, List<String> ar)
     {
         ArrayList<String> unattacked = new ArrayList();
@@ -197,10 +185,10 @@ public class ArgFw {
         return out;
     }   
 
-    private ArrayList<String> getAllArguments(ArrayList<String> ar)
+    private ArrayList<String> getAllArguments(ArrayList<String> att)
     {
         ArrayList<String> args = new ArrayList();
-        for (String a : ar)
+        for (String a : att)
         {
             String[] parts = a.split(",");
             if(!args.contains(parts[0]))
@@ -214,47 +202,17 @@ public class ArgFw {
         }
         return args;
     }
-    private boolean checkParameters(String a1, String a2){
-        String[] parts1 = a1.split(" ");
-        String[] parts2 = a2.split(" ");
-        if (parts1[1].equals(parts2[1]))
-        {
-            return true;
-        }
-        return false;
     
-}
-    private boolean checkReverse(ArrayList<String> ar, String a)
-    {
-        String[] parts = a.split(",");
-        a = parts[1] + "," + parts[0];
-        if (ar.contains(a))
-        {
-            ar.remove(a);
-            return true;
-        }
-        return false;
-    }
-    private boolean checkPreandEffects(String a1, String a2)
-    {
-        String[] parts1 = a1.split(" ");
-        String[] parts2 = a2.split(" ");
-        ArrayList<String> a1pc = StateHandler.get_Action_Preconditions(parts1[0].trim());
-        ArrayList<String> a2e = StateHandler.get_Action_Effects(parts2[0].trim());
+    
+    private boolean checkPreandEffects(Action a1, Action a2)
+    {        
+        ArrayList<String> a1pc = a1.get_Preconditions();
+        ArrayList<String> a2e = a2.get_Effects();
         for (String e : a1pc)
-        {
-            if (e.contains("?a"))
-            {
-                e = e.replaceAll("\\?a", parts1[1]);
-            }
-            e = "(not " + e + ")";           
-            
+        {          
+            e = "(not " + e + ")";                       
             for (String f : a2e)
-            {
-                if (f.contains("?a"))
-                {
-                    f = f.replaceAll("\\?a", parts2[1]);
-                }
+            {               
                 if (e.equals(f))
                 {
                     System.out.println("Conflict!");                   
@@ -263,5 +221,15 @@ public class ArgFw {
             }      
         }
         return false;
-    }   
+    }
+    
+    private int getTotalSize(ArrayList<Argument> args)
+    {
+        int totalSize= 0;
+        for (Argument a : args)
+        { 
+                totalSize += a.getSize();
+        }
+        return totalSize;
+    }
 }

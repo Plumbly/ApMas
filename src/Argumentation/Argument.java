@@ -4,19 +4,45 @@
  */
 package Argumentation;
 
+import environment.Action;
+import jade.core.AID;
+import java.io.Serializable;
+import java.util.ArrayList;
+
 /**
  *
  * @author Plumbly
  */
-public class Argument {
-    private final String action;
-    private final String parameter;
-    //private final ArrayList<String> preConds;
-    //private final ArrayList<String> Effects;
+public class Argument implements Serializable{
+    private AID agent;
+    private ArrayList<Action> plan;
     
-    public Argument(String action, String parameter)
+    
+    public Argument(AID agent, ArrayList<Action> plan)
     {
-        this.action = action;
-        this.parameter = parameter;
+        this.agent = agent;
+        this.plan = plan;
+    }
+    
+    public int getSize()
+    {
+        return plan.size();
+    }
+    public boolean isPlanEmpty()
+    {        
+        return plan.isEmpty();            
+    }
+    
+    public Action get_Next_Action()
+    {
+        return plan.get(0);
+    }
+    public void remove_Action()
+    {
+        plan.remove(0);
+    }
+    public AID get_Agent()
+    {
+        return agent;
     }
 }

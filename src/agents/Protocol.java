@@ -6,6 +6,8 @@ package agents;
 
 import agents.GenericAgent.sendArguments;
 import agents.LeaderAgent.computeArgs;
+import environment.Action;
+import environment.StateHandler;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.Behaviour;
@@ -33,9 +35,12 @@ public class Protocol {
                  break;                                  
              case (ACLMessage.INFORM):
                  ACLMessage reply = msg.createReply();
+                 Action act  = (Action)msg.getContentObject();
+                 System.out.println(act.get_Name()+ " " + act.get_Parameters());
                  reply.setPerformative(ACLMessage.CONFIRM);
-                 reply.setContent("Carrying out action!");
+                 reply.setContent("Action Complete!");
                  a.doWait(5000);
+                 StateHandler.updateState(act);
                  a.send(reply); 
                  break;
              case (ACLMessage.CONFIRM):                 
